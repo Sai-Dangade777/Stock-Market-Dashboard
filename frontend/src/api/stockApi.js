@@ -23,7 +23,7 @@ export const getCompanies = async () => {
       return mockCompanies;
     }
     
-    const response = await api.get('/stocks/companies');
+    const response = await api.get('/companies');
     return response.data;
   } catch (error) {
     console.error('Error fetching companies:', error);
@@ -42,7 +42,7 @@ export const getStockHistory = async (symbol, period = '1y') => {
       return generateMockStockData(symbol, period);
     }
     
-    const response = await api.get(`/stocks/${symbol}/history`, {
+    const response = await api.get(`/history/${symbol}`, {
       params: { period },
     });
     return response.data;
@@ -63,7 +63,7 @@ export const getCompanyDetails = async (symbol) => {
       return generateMockCompanyDetails(symbol);
     }
     
-    const response = await api.get(`/stocks/${symbol}`);
+    const response = await api.get(`/company/${symbol}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching company details:', error);
@@ -71,7 +71,6 @@ export const getCompanyDetails = async (symbol) => {
     // Fallback to mock data if API call fails
     console.log(`Falling back to mock company details for ${symbol}`);
     return generateMockCompanyDetails(symbol);
-    throw error;
   }
 };
 

@@ -1,150 +1,202 @@
-// Sample company data
-const companies = [
-  { id: 1, symbol: 'AAPL', name: 'Apple Inc.', sector: 'Technology', description: 'Consumer electronics, software and online services.' },
-  { id: 2, symbol: 'MSFT', name: 'Microsoft Corporation', sector: 'Technology', description: 'Software, hardware, and cloud computing.' },
-  { id: 3, symbol: 'AMZN', name: 'Amazon.com Inc.', sector: 'Consumer Cyclical', description: 'E-commerce, cloud computing, and digital streaming.' },
-  { id: 4, symbol: 'GOOGL', name: 'Alphabet Inc.', sector: 'Communication Services', description: 'Internet services and products.' },
-  { id: 5, symbol: 'META', name: 'Meta Platforms Inc.', sector: 'Communication Services', description: 'Social media technology company.' },
-  { id: 6, symbol: 'TSLA', name: 'Tesla, Inc.', sector: 'Automotive', description: 'Electric vehicles and clean energy.' },
-  { id: 7, symbol: 'BRK.B', name: 'Berkshire Hathaway Inc.', sector: 'Financial Services', description: 'Conglomerate holding company.' },
-  { id: 8, symbol: 'NVDA', name: 'NVIDIA Corporation', sector: 'Technology', description: 'Graphics processing units and artificial intelligence.' },
-  { id: 9, symbol: 'JPM', name: 'JPMorgan Chase & Co.', sector: 'Financial Services', description: 'Banking and financial services.' },
-  { id: 10, symbol: 'NFLX', name: 'Netflix, Inc.', sector: 'Communication Services', description: 'Streaming media and video production.' },
-  { id: 11, symbol: 'DIS', name: 'The Walt Disney Company', sector: 'Communication Services', description: 'Entertainment and media conglomerate.' },
-  { id: 12, symbol: 'PYPL', name: 'PayPal Holdings, Inc.', sector: 'Financial Services', description: 'Online payment solutions.' },
+const fs = require('fs');
+const path = require('path');
+const yahooFinance = require('yahoo-finance2').default;
+
+// List of stock symbols to track
+const stockSymbols = [
+  'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META',
+  'TSLA', 'NVDA', 'JPM', 'V', 'JNJ'
 ];
 
-// Function to initialize the in-memory database with sample data
-async function initializeDb(db) {
-  console.log('Initializing in-memory database...');
-  
-  // Create companies and stock_prices collections
-  db.companies = [...companies];
-  db.stock_prices = [];
-  
-  // Generate stock price data for each company
-  console.log('Generating mock stock price data...');
-  for (const company of companies) {
-    const stockData = generateMockStockData(company.symbol);
-    
-    // Add company ID to each data point
-    const stockPricesWithCompanyId = stockData.map(dataPoint => ({
-      ...dataPoint,
-      company_id: company.id
-    }));
-    
-    // Add to the database
-    db.stock_prices.push(...stockPricesWithCompanyId);
-    
-    console.log(`Generated ${stockData.length} stock price records for ${company.symbol}`);
-  }
-  
-  console.log('In-memory database initialization complete');
-  console.log(`Total companies: ${db.companies.length}`);
-  console.log(`Total stock price records: ${db.stock_prices.length}`);
-  
-  // Add some statistics for each company
-  addCompanyStats(db);
-  
-  return db;
-}
+// Company info mapping
+const companyInfo = {
+  'AAPL': { name: 'Apple Inc.', sector: 'Technology', description: 'Apple Inc. designs, manufactures, and markets smartphones, personal computers, tablets, wearables, and accessories worldwide.' },
+  'MSFT': { name: 'Microsoft Corporation', sector: 'Technology', description: 'Microsoft Corporation develops, licenses, and supports software, services, devices, and solutions worldwide.' },
+  'GOOGL': { name: 'Alphabet Inc.', sector: 'Technology', description: 'Alphabet Inc. provides various products and platforms in the United States, Europe, the Middle East, Africa, the Asia-Pacific, Canada, and Latin America.' },
+  'AMZN': { name: 'Amazon.com, Inc.', sector: 'Consumer Cyclical', description: 'Amazon.com, Inc. engages in the retail sale of consumer products and subscriptions through online and physical stores in North America and internationally.' },
+  'META': { name: 'Meta Platforms, Inc.', sector: 'Technology', description: 'Meta Platforms, Inc. engages in the development of products that enable people to connect and share with friends and family through mobile devices, personal computers, and other surfaces worldwide.' },
+  'TSLA': { name: 'Tesla, Inc.', sector: 'Automotive', description: 'Tesla, Inc. designs, develops, manufactures, leases, and sells electric vehicles, and energy generation and storage systems.' },
+  'NVDA': { name: 'NVIDIA Corporation', sector: 'Technology', description: 'NVIDIA Corporation provides graphics, and compute and networking solutions in the United States, Taiwan, China, and internationally.' },
+  'JPM': { name: 'JPMorgan Chase & Co.', sector: 'Financial Services', description: 'JPMorgan Chase & Co. operates as a financial services company worldwide.' },
+  'V': { name: 'Visa Inc.', sector: 'Financial Services', description: 'Visa Inc. operates as a payments technology company worldwide.' },
+  'JNJ': { name: 'Johnson & Johnson', sector: 'Healthcare', description: 'Johnson & Johnson researches, develops, manufactures, and sells various products in the healthcare field worldwide.' }
+};
 
-// Function to add statistics to company objects
-function addCompanyStats(db) {
-  for (const company of db.companies) {
-    const companyStockData = db.stock_prices.filter(price => price.company_id === company.id);
-    
-    // Get data from the past year
-    const yearAgo = new Date();
-    yearAgo.setFullYear(yearAgo.getFullYear() - 1);
-    
-    const yearData = companyStockData.filter(price => new Date(price.date) >= yearAgo);
-    
-    if (yearData.length > 0) {
-      // Calculate 52-week high and low
-      company.year_high = Math.max(...yearData.map(price => price.close));
-      company.year_low = Math.min(...yearData.map(price => price.close));
-      
-      // Calculate average volume (last 30 days)
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      
-      const thirtyDayData = companyStockData.filter(price => new Date(price.date) >= thirtyDaysAgo);
-      if (thirtyDayData.length > 0) {
-        const totalVolume = thirtyDayData.reduce((sum, price) => sum + price.volume, 0);
-        company.avg_volume = totalVolume / thirtyDayData.length;
-      }
-      
-      // Add latest price
-      const latestPrice = companyStockData.sort((a, b) => 
-        new Date(b.date) - new Date(a.date)
-      )[0];
-      
-      company.latest_price = latestPrice;
-    }
-  }
-}
+let stockData = {};
 
-// Function to generate mock historical stock data
-function generateMockStockData(symbol) {
-  const stockData = [];
-  const today = new Date();
-  
-  // Generate data for the past 2 years
-  for (let i = 730; i >= 0; i--) {
-    const date = new Date(today);
-    date.setDate(date.getDate() - i);
-    
-    // Skip weekends
-    const day = date.getDay();
-    if (day === 0 || day === 6) {
-      continue;
-    }
-    
-    // Generate a random starting price between 50 and 500 based on the symbol
-    // This ensures consistent pricing for the same symbol
-    const basePrice = getBasePrice(symbol);
-    
-    // Add some randomness and trends
-    const trend = Math.sin(i / 30) * 0.1; // Cyclical component
-    const randomFactor = Math.random() * 0.06 - 0.03; // Random daily fluctuation
-    const timeTrend = i / 730 * 0.5; // Long term trend
-    
-    const dayChange = basePrice * (trend + randomFactor - timeTrend);
-    
-    // Calculate OHLC values
-    const open = basePrice + dayChange;
-    const close = open * (1 + (Math.random() * 0.06 - 0.03));
-    const high = Math.max(open, close) * (1 + Math.random() * 0.03);
-    const low = Math.min(open, close) * (1 - Math.random() * 0.03);
-    
-    // Generate a random volume
-    const volume = Math.floor(Math.random() * 10000000) + 1000000;
-    
-    stockData.push({
-      date: date.toISOString().split('T')[0],
-      open: parseFloat(open.toFixed(2)),
-      high: parseFloat(high.toFixed(2)),
-      low: parseFloat(low.toFixed(2)),
-      close: parseFloat(close.toFixed(2)),
-      volume
+// Function to fetch historical data for a stock
+async function fetchStockHistory(symbol, period = '1y', interval = '1d') {
+  try {
+    const result = await yahooFinance.historical(symbol, {
+      period1: new Date(Date.now() - period === '5y' ? 5 * 365 * 24 * 60 * 60 * 1000 : 
+                        period === '1y' ? 365 * 24 * 60 * 60 * 1000 : 
+                        period === '6m' ? 180 * 24 * 60 * 60 * 1000 : 
+                        period === '3m' ? 90 * 24 * 60 * 60 * 1000 : 
+                        period === '1m' ? 30 * 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000),
+      period2: new Date(),
+      interval: interval
     });
+    
+    return result.map(item => ({
+      date: item.date.toISOString().split('T')[0],
+      open: item.open,
+      high: item.high,
+      low: item.low,
+      close: item.close,
+      volume: item.volume
+    }));
+  } catch (error) {
+    console.error(`Error fetching data for ${symbol}:`, error);
+    return [];
   }
-  
-  return stockData;
 }
 
-// Helper function to get a consistent base price for a company
-function getBasePrice(symbol) {
-  // Simple hash function to get a number from a string
-  let hash = 0;
-  for (let i = 0; i < symbol.length; i++) {
-    hash = ((hash << 5) - hash) + symbol.charCodeAt(i);
-    hash = hash & hash; // Convert to 32bit integer
+// Function to fetch company details
+async function fetchCompanyDetails(symbol) {
+  try {
+    const quote = await yahooFinance.quoteSummary(symbol, {
+      modules: ['price', 'summaryDetail', 'defaultKeyStatistics']
+    });
+    
+    const price = quote.price;
+    const details = quote.summaryDetail;
+    const stats = quote.defaultKeyStatistics;
+    
+    return {
+      symbol,
+      name: companyInfo[symbol]?.name || price.shortName || price.longName,
+      sector: companyInfo[symbol]?.sector || 'N/A',
+      description: companyInfo[symbol]?.description || 'No description available',
+      currentPrice: price.regularMarketPrice,
+      change: price.regularMarketChange,
+      changePercent: price.regularMarketChangePercent,
+      marketCap: details.marketCap,
+      volume: details.volume,
+      high52Week: details.fiftyTwoWeekHigh,
+      low52Week: details.fiftyTwoWeekLow,
+      avgVolume: details.averageVolume
+    };
+  } catch (error) {
+    console.error(`Error fetching details for ${symbol}:`, error);
+    return {
+      symbol,
+      name: companyInfo[symbol]?.name || symbol,
+      sector: companyInfo[symbol]?.sector || 'N/A',
+      description: companyInfo[symbol]?.description || 'No description available',
+      currentPrice: 0,
+      change: 0,
+      changePercent: 0,
+      marketCap: 0,
+      volume: 0,
+      high52Week: 0,
+      low52Week: 0,
+      avgVolume: 0
+    };
   }
-  
-  // Map the hash to a price range between 50 and 500
-  return Math.abs(hash % 450) + 50;
 }
 
-module.exports = initializeDb;
+// Initialize stock data
+async function initializeStockData() {
+  console.log('Initializing stock data from Yahoo Finance API...');
+  
+  try {
+    // Fetch company details for all symbols
+    const companyPromises = stockSymbols.map(fetchCompanyDetails);
+    const companies = await Promise.all(companyPromises);
+    
+    // Store company data
+    stockData.companies = companies;
+    
+    // Fetch historical data for all symbols
+    for (const symbol of stockSymbols) {
+      const history = await fetchStockHistory(symbol);
+      if (!stockData.history) stockData.history = {};
+      stockData.history[symbol] = history;
+    }
+    
+    console.log('Stock data initialization complete');
+    return { success: true, message: 'Stock data initialized successfully' };
+  } catch (error) {
+    console.error('Error initializing stock data:', error);
+    return { success: false, message: 'Failed to initialize stock data', error };
+  }
+}
+
+// Function to get all companies
+function getCompanies() {
+  return stockData.companies || [];
+}
+
+// Function to get stock history for a symbol
+function getStockHistory(symbol, period = '1y') {
+  if (!stockData.history || !stockData.history[symbol]) {
+    return [];
+  }
+  
+  const history = stockData.history[symbol];
+  
+  // Filter history based on period
+  const now = new Date();
+  let startDate;
+  
+  switch (period) {
+    case '5y':
+      startDate = new Date(now.getFullYear() - 5, now.getMonth(), now.getDate());
+      break;
+    case '1y':
+      startDate = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+      break;
+    case '6m':
+      startDate = new Date(now.getFullYear(), now.getMonth() - 6, now.getDate());
+      break;
+    case '3m':
+      startDate = new Date(now.getFullYear(), now.getMonth() - 3, now.getDate());
+      break;
+    case '1m':
+      startDate = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+      break;
+    case '1w':
+      startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
+      break;
+    default:
+      startDate = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+  }
+  
+  // Convert date strings to Date objects for comparison
+  return history.filter(item => new Date(item.date) >= startDate);
+}
+
+// Function to get company details
+function getCompanyDetails(symbol) {
+  return stockData.companies?.find(company => company.symbol === symbol) || null;
+}
+
+// Function to refresh stock data for a specific symbol
+async function refreshStockData(symbol) {
+  try {
+    const companyDetails = await fetchCompanyDetails(symbol);
+    const history = await fetchStockHistory(symbol);
+    
+    // Update stockData
+    const companyIndex = stockData.companies?.findIndex(company => company.symbol === symbol) || -1;
+    if (companyIndex >= 0) {
+      stockData.companies[companyIndex] = companyDetails;
+    }
+    
+    if (!stockData.history) stockData.history = {};
+    stockData.history[symbol] = history;
+    
+    return { success: true, message: `Stock data refreshed for ${symbol}` };
+  } catch (error) {
+    console.error(`Error refreshing data for ${symbol}:`, error);
+    return { success: false, message: `Failed to refresh data for ${symbol}`, error };
+  }
+}
+
+module.exports = {
+  initializeDb: initializeStockData,
+  getCompanies,
+  getStockHistory,
+  getCompanyDetails,
+  refreshStockData
+};

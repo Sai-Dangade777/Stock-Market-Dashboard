@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -29,42 +29,46 @@ const StockChart = ({ stockData, companyName, symbol, period, onPeriodChange }) 
   const [chartData, setChartData] = useState(null);
   
   useEffect(() => {
-    if (!stockData || stockData.length === 0) return;
+    if (!stockData || stockData.length === 0) {
+      return;
+    }
     
-    // Format data for Chart.js
-    const dates = stockData.map(item => {
+    // Sort data chronologically
+    const sortedData = [...stockData].sort((a, b) => new Date(a.date) - new Date(b.date));
+    
+    // Extract data points
+    const dates = sortedData.map(item => {
       const date = new Date(item.date);
       // Format date differently based on the period
-      if (period === '1w' || period === '1m') {
-        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      if (period === "1w" || period === "1m") {
+        return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
       } else {
-        return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+        return date.toLocaleDateString("en-US", { year: "numeric", month: "short" });
       }
     });
     
-    const closePrices = stockData.map(item => item.close);
-    const openPrices = stockData.map(item => item.open);
+    const closePrices = sortedData.map(item => item.close);
     
     // Calculate price change
-    const firstPrice = stockData[0].close;
-    const lastPrice = stockData[stockData.length - 1].close;
+    const firstPrice = closePrices[0];
+    const lastPrice = closePrices[closePrices.length - 1];
     const priceChange = lastPrice - firstPrice;
     const priceChangePercent = (priceChange / firstPrice) * 100;
     
     // Set line colors based on price change
-    const lineColor = priceChange >= 0 ? 'rgba(0, 170, 91, 1)' : 'rgba(255, 53, 53, 1)';
-    const areaColor = priceChange >= 0 ? 'rgba(0, 170, 91, 0.1)' : 'rgba(255, 53, 53, 0.1)';
+    const lineColor = priceChange >= 0 ? "rgba(0, 170, 91, 1)" : "rgba(255, 53, 53, 1)";
+    const areaColor = priceChange >= 0 ? "rgba(0, 170, 91, 0.1)" : "rgba(255, 53, 53, 0.1)";
     
     setChartData({
       labels: dates,
       datasets: [
         {
-          label: 'Close Price',
+          label: `${symbol} Stock Price`,
           data: closePrices,
           borderColor: lineColor,
           backgroundColor: areaColor,
           pointBackgroundColor: lineColor,
-          pointBorderColor: '#fff',
+          pointBorderColor: "#fff",
           pointBorderWidth: 1,
           pointRadius: dates.length < 30 ? 3 : 0,
           pointHoverRadius: 5,
@@ -77,15 +81,15 @@ const StockChart = ({ stockData, companyName, symbol, period, onPeriodChange }) 
       currentPrice: lastPrice,
     });
     
-  }, [stockData, period]);
+  }, [stockData, period, symbol]);
 
   const periods = [
-    { value: '1w', label: '1W' },
-    { value: '1m', label: '1M' },
-    { value: '3m', label: '3M' },
-    { value: '6m', label: '6M' },
-    { value: '1y', label: '1Y' },
-    { value: '5y', label: '5Y' },
+    { value: "1w", label: "1W" },
+    { value: "1m", label: "1M" },
+    { value: "3m", label: "3M" },
+    { value: "6m", label: "6M" },
+    { value: "1y", label: "1Y" },
+    { value: "5y", label: "5Y" },
   ];
 
   const chartOptions = {
@@ -93,80 +97,78 @@ const StockChart = ({ stockData, companyName, symbol, period, onPeriodChange }) 
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        display: false,
+        display: false
       },
       tooltip: {
-        mode: 'index',
+        mode: "index",
         intersect: false,
         callbacks: {
           label: function(context) {
-            let label = context.dataset.label || '';
+            let label = context.dataset.label || "";
             if (label) {
-              label += ': ';
+              label += ": ";
             }
             if (context.parsed.y !== null) {
-              label += new Intl.NumberFormat('en-US', { 
-                style: 'currency', 
-                currency: 'USD',
-                minimumFractionDigits: 2
+              label += new Intl.NumberFormat("en-US", { 
+                style: "currency", 
+                currency: "USD",
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 3
               }).format(context.parsed.y);
             }
             return label;
           }
         }
-      },
-          title: function(tooltipItems) {
-            return tooltipItems[0].label;
-          },
-          label: function(context) {
-            let label = context.dataset.label || '';
-            if (label) {
-              label += ': ';
-            }
-            if (context.parsed.y !== null) {
-              label += new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: 'USD'
-              }).format(context.parsed.y);
-            }
-            return label;
-          }
-        }
-      },
+      }
     },
     scales: {
       x: {
         grid: {
-          display: false,
+          display: false
         },
         ticks: {
           maxRotation: 0,
           autoSkip: true,
-          maxTicksLimit: 8,
+          maxTicksLimit: 8
         }
       },
       y: {
-        position: 'right',
+        position: "right",
         grid: {
-          color: 'rgba(200, 200, 200, 0.2)',
+          color: "rgba(200, 200, 200, 0.2)"
         },
         ticks: {
           callback: function(value) {
-            return '$' + value.toFixed(2);
+            return "$" + value.toFixed(3);
           }
         }
       }
     },
     interaction: {
-      mode: 'nearest',
-      axis: 'x',
+      mode: "index",
       intersect: false
     },
     hover: {
-      mode: 'nearest',
+      mode: "index",
       intersect: false
     }
   };
+
+  if (!stockData || stockData.length === 0) {
+    return (
+      <div className="stock-chart-container">
+        <div className="chart-header">
+          <div className="chart-title">
+            <h2>Loading chart...</h2>
+          </div>
+        </div>
+        <div className="chart-placeholder">
+          <div className="loading-spinner"></div>
+          <p>Loading stock data...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!chartData) {
     return (
@@ -188,11 +190,13 @@ const StockChart = ({ stockData, companyName, symbol, period, onPeriodChange }) 
     <div className="stock-chart-container">
       <div className="chart-header">
         <div className="chart-title">
-          <h2>{companyName} ({symbol})</h2>
-          <div className="price-info">
-            <span className="current-price">${chartData.currentPrice.toFixed(2)}</span>
-            <span className={`price-change ${isPositive ? 'positive' : 'negative'}`}>
-              {isPositive ? '▲' : '▼'} ${Math.abs(chartData.priceChange).toFixed(2)} ({Math.abs(chartData.priceChangePercent).toFixed(2)}%)
+          <h2>{companyName || symbol}</h2>
+          <div className="chart-subtitle">
+            <span className="current-price">
+              ${chartData.currentPrice.toFixed(3)}
+            </span>
+            <span className={`price-change ${isPositive ? "positive" : "negative"}`}>
+              {isPositive ? "" : ""} ${Math.abs(chartData.priceChange).toFixed(3)} ({Math.abs(chartData.priceChangePercent).toFixed(3)}%)
             </span>
           </div>
         </div>
@@ -200,7 +204,7 @@ const StockChart = ({ stockData, companyName, symbol, period, onPeriodChange }) 
           {periods.map(p => (
             <button 
               key={p.value}
-              className={`period-button ${period === p.value ? 'active' : ''}`}
+              className={`period-button ${period === p.value ? "active" : ""}`}
               onClick={() => onPeriodChange(p.value)}
             >
               {p.label}

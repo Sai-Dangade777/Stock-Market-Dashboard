@@ -1,0 +1,45 @@
+services:
+  # Backend API Service
+  - type: web
+    name: stock-market-api
+    env: node
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    repo: https://github.com/Sai-Dangade777/Stock-Market-Dashboard.git
+    branch: master
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - fromGroup: stock-market-secrets
+    healthCheckPath: /health
+    autoDeploy: true
+
+  # Frontend Static Site
+  - type: web
+    name: stock-market-frontend
+    env: static
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: frontend/build
+    repo: https://github.com/Sai-Dangade777/Stock-Market-Dashboard.git
+    branch: master
+    envVars:
+      - key: REACT_APP_API_URL
+        value: https://stock-market-api.onrender.com/api
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: no-cache
+    autoDeploy: true
+
+# Environment variable group
+envVarGroups:
+  - name: stock-market-secrets
+    envVars:
+      - key: API_KEY
+        generateValue: true

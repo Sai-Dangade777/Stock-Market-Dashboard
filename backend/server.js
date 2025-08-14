@@ -6,10 +6,17 @@ const path = require('path');
 const db = require('./db/init');
 
 const app = express();
-const PORT = 5001; // Hardcoded port for simplicity
+const PORT = process.env.PORT || 5001;
 
 // Middleware
-app.use(cors());
+const corsOptions = {
+  origin: process.env.NODE_ENV === 'production' 
+    ? ['https://stock-market-frontend.onrender.com', 'https://sai-dangade777.github.io'] 
+    : 'http://localhost:3000',
+  optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(morgan('dev'));
 

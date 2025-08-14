@@ -1,10 +1,10 @@
 import axios from 'axios';
 import { mockCompanies, generateMockStockData, generateMockCompanyDetails } from '../mockData/mockStockData';
 
-// For GitHub Pages deployment, we'll use mock data if the backend is not available
+// Use environment variable for API URL or fallback to localhost
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
 
-// Check if we're on GitHub Pages
+// Check if we're on GitHub Pages or if API is not available
 const isGitHubPages = window.location.hostname.includes('github.io');
 
 const api = axios.create({

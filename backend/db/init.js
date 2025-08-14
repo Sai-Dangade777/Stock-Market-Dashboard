@@ -2,13 +2,11 @@ const fs = require('fs');
 const path = require('path');
 const yahooFinance = require('yahoo-finance2').default;
 
-// List of stock symbols to track
 const stockSymbols = [
   'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META',
   'TSLA', 'NVDA', 'JPM', 'V', 'JNJ'
 ];
 
-// Company info mapping
 const companyInfo = {
   'AAPL': { name: 'Apple Inc.', sector: 'Technology', description: 'Apple Inc. designs, manufactures, and markets smartphones, personal computers, tablets, wearables, and accessories worldwide.' },
   'MSFT': { name: 'Microsoft Corporation', sector: 'Technology', description: 'Microsoft Corporation develops, licenses, and supports software, services, devices, and solutions worldwide.' },
@@ -24,7 +22,6 @@ const companyInfo = {
 
 let stockData = {};
 
-// Function to fetch historical data for a stock
 async function fetchStockHistory(symbol, period = '1y', interval = '1d') {
   try {
     const result = await yahooFinance.historical(symbol, {
@@ -51,7 +48,6 @@ async function fetchStockHistory(symbol, period = '1y', interval = '1d') {
   }
 }
 
-// Function to fetch company details
 async function fetchCompanyDetails(symbol) {
   try {
     const quote = await yahooFinance.quoteSummary(symbol, {
@@ -95,19 +91,15 @@ async function fetchCompanyDetails(symbol) {
   }
 }
 
-// Initialize stock data
 async function initializeStockData() {
   console.log('Initializing stock data from Yahoo Finance API...');
   
   try {
-    // Fetch company details for all symbols
     const companyPromises = stockSymbols.map(fetchCompanyDetails);
     const companies = await Promise.all(companyPromises);
     
-    // Store company data
     stockData.companies = companies;
     
-    // Fetch historical data for all symbols
     for (const symbol of stockSymbols) {
       const history = await fetchStockHistory(symbol);
       if (!stockData.history) stockData.history = {};
@@ -122,12 +114,10 @@ async function initializeStockData() {
   }
 }
 
-// Function to get all companies
 function getCompanies() {
   return stockData.companies || [];
 }
 
-// Function to get stock history for a symbol
 function getStockHistory(symbol, period = '1y') {
   if (!stockData.history || !stockData.history[symbol]) {
     return [];
@@ -135,7 +125,6 @@ function getStockHistory(symbol, period = '1y') {
   
   const history = stockData.history[symbol];
   
-  // Filter history based on period
   const now = new Date();
   let startDate;
   
@@ -162,22 +151,18 @@ function getStockHistory(symbol, period = '1y') {
       startDate = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
   }
   
-  // Convert date strings to Date objects for comparison
   return history.filter(item => new Date(item.date) >= startDate);
 }
 
-// Function to get company details
 function getCompanyDetails(symbol) {
   return stockData.companies?.find(company => company.symbol === symbol) || null;
 }
 
-// Function to refresh stock data for a specific symbol
 async function refreshStockData(symbol) {
   try {
     const companyDetails = await fetchCompanyDetails(symbol);
     const history = await fetchStockHistory(symbol);
     
-    // Update stockData
     const companyIndex = stockData.companies?.findIndex(company => company.symbol === symbol) || -1;
     if (companyIndex >= 0) {
       stockData.companies[companyIndex] = companyDetails;

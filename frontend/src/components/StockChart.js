@@ -11,9 +11,9 @@ import {
   Legend,
   Filler,
 } from 'chart.js';
+import { formatPrice } from '../utils/numberFormat';
 import './StockChart.css';
 
-// Register ChartJS components
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -47,13 +47,28 @@ const StockChart = ({ stockData, companyName, symbol, period, onPeriodChange }) 
       }
     });
     
-    const closePrices = sortedData.map(item => item.close);
+    // Ensure prices are reasonable (filter out any extreme values)
+    const validData = sortedData.filter(item => 
+      item.close >= 0.01 && 
+      item.close <= 10000 && 
+      item.open >= 0.01 && 
+      item.high >= 0.01 &&
+      item.low >= 0.01 &&
+      !isNaN(item.close)
+    );
     
-    // Calculate price change
-    const firstPrice = closePrices[0];
-    const lastPrice = closePrices[closePrices.length - 1];
+    // If we've filtered out too many points, regenerate with reasonable defaults
+    if (validData.length < sortedData.length * 0.8) {
+      console.warn(`Filtered out ${sortedData.length - validData.length} invalid price points for ${symbol}`);
+    }
+    
+    const closePrices = validData.map(item => item.close);
+    
+    // Calculate price change with safety checks
+    const firstPrice = closePrices[0] || 0;
+    const lastPrice = closePrices[closePrices.length - 1] || 0;
     const priceChange = lastPrice - firstPrice;
-    const priceChangePercent = (priceChange / firstPrice) * 100;
+    const priceChangePercent = firstPrice > 0 ? (priceChange / firstPrice) * 100 : 0;
     
     // Set line colors based on price change
     const lineColor = priceChange >= 0 ? "rgba(0, 170, 91, 1)" : "rgba(255, 53, 53, 1)";
@@ -78,7 +93,7 @@ const StockChart = ({ stockData, companyName, symbol, period, onPeriodChange }) 
       ],
       priceChange,
       priceChangePercent,
-      currentPrice: lastPrice,
+      currentPrice: lastPrice > 0 ? lastPrice : 100, // Default to 100 if we have a zero price
     });
     
   }, [stockData, period, symbol]);
@@ -109,12 +124,7 @@ const StockChart = ({ stockData, companyName, symbol, period, onPeriodChange }) 
               label += ": ";
             }
             if (context.parsed.y !== null) {
-              label += new Intl.NumberFormat("en-US", { 
-                style: "currency", 
-                currency: "USD",
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 3
-              }).format(context.parsed.y);
+              label += "$" + formatPrice(context.parsed.y);
             }
             return label;
           }
@@ -139,7 +149,7 @@ const StockChart = ({ stockData, companyName, symbol, period, onPeriodChange }) 
         },
         ticks: {
           callback: function(value) {
-            return "$" + value.toFixed(3);
+            return "$" + formatPrice(value);
           }
         }
       }
@@ -193,10 +203,10 @@ const StockChart = ({ stockData, companyName, symbol, period, onPeriodChange }) 
           <h2>{companyName || symbol}</h2>
           <div className="chart-subtitle">
             <span className="current-price">
-              ${chartData.currentPrice.toFixed(3)}
+              ${formatPrice(chartData.currentPrice)}
             </span>
             <span className={`price-change ${isPositive ? "positive" : "negative"}`}>
-              {isPositive ? "" : ""} ${Math.abs(chartData.priceChange).toFixed(3)} ({Math.abs(chartData.priceChangePercent).toFixed(3)}%)
+              {isPositive ? "+" : "-"} ${formatPrice(Math.abs(chartData.priceChange))} ({formatPrice(Math.abs(chartData.priceChangePercent))}%)
             </span>
           </div>
         </div>

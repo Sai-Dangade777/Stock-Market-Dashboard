@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const { getCompanies, getStockHistory, getCompanyDetails, refreshStockData } = require('../db/init');
 
-// Get all companies
 router.get('/companies', async (req, res) => {
   try {
     const companies = getCompanies();
@@ -13,7 +12,6 @@ router.get('/companies', async (req, res) => {
   }
 });
 
-// Get stock history for a company
 router.get('/history/:symbol', async (req, res) => {
   try {
     const { symbol } = req.params;
@@ -26,7 +24,6 @@ router.get('/history/:symbol', async (req, res) => {
   }
 });
 
-// Get company details
 router.get('/company/:symbol', async (req, res) => {
   try {
     const { symbol } = req.params;
@@ -43,7 +40,6 @@ router.get('/company/:symbol', async (req, res) => {
   }
 });
 
-// Refresh data for a specific stock
 router.post('/refresh/:symbol', async (req, res) => {
   try {
     const { symbol } = req.params;

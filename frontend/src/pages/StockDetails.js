@@ -87,8 +87,8 @@ const StockDetails = () => {
         )}
       </div>
       
-      <div className="details-grid">
-        <div className="chart-section">
+      <div className="chart-and-stats-container">
+        <div className="stock-chart-wrapper">
           <StockChart 
             stockData={stockData} 
             companyName={companyDetails?.name || ''}
@@ -99,7 +99,7 @@ const StockDetails = () => {
           />
         </div>
         
-        <div className="stats-section">
+        <div className="stock-stats-wrapper">
           <StockStats 
             stats={companyDetails}
             isLoading={loading.companyDetails}

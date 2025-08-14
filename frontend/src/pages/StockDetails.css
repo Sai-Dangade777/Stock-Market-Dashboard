@@ -209,3 +209,42 @@
     margin-bottom: 10px;
   }
 }
+
+/* Responsive chart layout */
+.chart-and-stats-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+.stock-chart-wrapper {
+  width: 100%;
+  height: auto;
+  min-height: 400px;
+  margin-bottom: 20px;
+}
+
+.stock-stats-wrapper {
+  width: 100%;
+}
+
+/* Additional responsive tweaks */
+@media (max-width: 768px) {
+  .stock-details-container {
+    padding: 15px;
+  }
+  
+  .chart-and-stats-container {
+    gap: 15px;
+  }
+  
+  .stock-chart-wrapper {
+    min-height: 350px;
+  }
+}
+
+@media (max-width: 480px) {
+  .stock-chart-wrapper {
+    min-height: 300px;
+  }
+}

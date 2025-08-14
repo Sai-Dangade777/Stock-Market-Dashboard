@@ -17,11 +17,30 @@
 }
 
 .chart-section {
-  height: 100%;
+  height: auto;
+  min-height: 450px;
 }
 
 .stats-section {
   margin-top: 20px;
+}
+
+/* Responsive layout */
+@media (max-width: 1024px) {
+  .dashboard-layout {
+    grid-template-columns: 300px 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+  }
+  
+  .company-list-section {
+    margin-bottom: 20px;
+  }
 }
 
 /* Error Styles */

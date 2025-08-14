@@ -3,9 +3,12 @@
   border-radius: 10px;
   box-shadow: var(--box-shadow);
   padding: 20px;
-  height: 100%;
+  width: 100%;
+  height: auto;
+  min-height: 400px;
   display: flex;
   flex-direction: column;
+  overflow: visible;
 }
 
 .dark-theme .stock-chart-container {
@@ -94,6 +97,66 @@
   background-color: var(--primary-color);
   color: #fff;
   border-color: var(--primary-color);
+}
+
+/* Chart container sizing */
+.chart-container {
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding-bottom: 50%; /* Aspect ratio */
+  min-height: 300px;
+}
+
+/* Media queries for responsive design */
+@media (max-width: 1024px) {
+  .chart-container {
+    padding-bottom: 55%;
+  }
+}
+
+@media (max-width: 768px) {
+  .stock-chart-container {
+    padding: 15px;
+  }
+  
+  .chart-title h2 {
+    font-size: 1.3rem;
+  }
+  
+  .chart-container {
+    padding-bottom: 60%;
+  }
+  
+  .period-buttons {
+    margin-top: 10px;
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .period-button {
+    padding: 6px 8px;
+    margin-right: 5px;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .chart-container {
+    padding-bottom: 75%;
+    min-height: 250px;
+  }
+  
+  .chart-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .period-buttons {
+    margin-top: 15px;
+    overflow-x: auto;
+    padding-bottom: 5px;
+  }
 }
 
 .chart-container {

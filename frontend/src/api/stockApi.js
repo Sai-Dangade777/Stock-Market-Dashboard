@@ -1,6 +1,11 @@
 import axios from 'axios';
+import { mockCompanies, generateMockStockData, generateMockCompanyDetails } from '../mockData/mockStockData';
 
+// For GitHub Pages deployment, we'll use mock data if the backend is not available
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
+
+// Check if we're on GitHub Pages
+const isGitHubPages = window.location.hostname.includes('github.io');
 
 const api = axios.create({
   baseURL: API_URL,
@@ -12,32 +17,60 @@ const api = axios.create({
 // API service functions
 export const getCompanies = async () => {
   try {
+    // Use mock data if on GitHub Pages
+    if (isGitHubPages) {
+      console.log('Using mock company data for GitHub Pages');
+      return mockCompanies;
+    }
+    
     const response = await api.get('/stocks/companies');
     return response.data;
   } catch (error) {
     console.error('Error fetching companies:', error);
-    throw error;
+    
+    // Fallback to mock data if API call fails
+    console.log('Falling back to mock company data');
+    return mockCompanies;
   }
 };
 
 export const getStockHistory = async (symbol, period = '1y') => {
   try {
+    // Use mock data if on GitHub Pages
+    if (isGitHubPages) {
+      console.log(`Using mock stock history data for ${symbol} (${period})`);
+      return generateMockStockData(symbol, period);
+    }
+    
     const response = await api.get(`/stocks/${symbol}/history`, {
       params: { period },
     });
     return response.data;
   } catch (error) {
     console.error('Error fetching stock history:', error);
-    throw error;
+    
+    // Fallback to mock data if API call fails
+    console.log(`Falling back to mock stock history data for ${symbol}`);
+    return generateMockStockData(symbol, period);
   }
 };
 
 export const getCompanyDetails = async (symbol) => {
   try {
+    // Use mock data if on GitHub Pages
+    if (isGitHubPages) {
+      console.log(`Using mock company details for ${symbol}`);
+      return generateMockCompanyDetails(symbol);
+    }
+    
     const response = await api.get(`/stocks/${symbol}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching company details:', error);
+    
+    // Fallback to mock data if API call fails
+    console.log(`Falling back to mock company details for ${symbol}`);
+    return generateMockCompanyDetails(symbol);
     throw error;
   }
 };

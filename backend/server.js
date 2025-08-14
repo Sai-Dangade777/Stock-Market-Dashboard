@@ -11,7 +11,7 @@ const PORT = process.env.PORT || 5001;
 // Middleware
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://stock-market-frontend.onrender.com', 'https://sai-dangade777.github.io'] 
+    ? ['https://stock-market-dashboard-frontend.vercel.app', 'https://sai-dangade777.github.io'] 
     : 'http://localhost:3000',
   optionsSuccessStatus: 200
 };
@@ -33,7 +33,12 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok', message: 'Server is running' });
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// For local development, listen on PORT
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
+
+// Export for Vercel
+module.exports = app;

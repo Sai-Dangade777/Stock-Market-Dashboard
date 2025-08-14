@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/Stock-Market-Dashboard/static/css/main.28c7e0da.css",
+    "main.js": "/Stock-Market-Dashboard/static/js/main.c50f9cae.js",
+    "index.html": "/Stock-Market-Dashboard/index.html",
+    "main.28c7e0da.css.map": "/Stock-Market-Dashboard/static/css/main.28c7e0da.css.map",
+    "main.c50f9cae.js.map": "/Stock-Market-Dashboard/static/js/main.c50f9cae.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.28c7e0da.css",
+    "static/js/main.c50f9cae.js"
+  ]
+}

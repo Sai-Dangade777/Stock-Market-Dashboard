@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Market Dashboard API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        code {
+            background: #f4f4f4;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+        .endpoint {
+            background: #f8f9fa;
+            padding: 15px;
+            border-left: 4px solid #3498db;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Stock Market Dashboard API</h1>
+    <p>This is the backend API for the Stock Market Dashboard application.</p>
+    
+    <h2>API Endpoints</h2>
+    
+    <div class="endpoint">
+        <h3>Get All Companies</h3>
+        <p><code>GET /.netlify/functions/api/companies</code></p>
+        <p>Returns a list of all companies with their current stock information.</p>
+    </div>
+    
+    <div class="endpoint">
+        <h3>Get Company Details</h3>
+        <p><code>GET /.netlify/functions/api/company/:symbol</code></p>
+        <p>Returns detailed information about a specific company.</p>
+    </div>
+    
+    <div class="endpoint">
+        <h3>Get Stock History</h3>
+        <p><code>GET /.netlify/functions/api/history/:symbol</code></p>
+        <p>Returns historical stock data for a specific company.</p>
+        <p>Query parameters:</p>
+        <ul>
+            <li><code>period</code>: Time period (1d, 1w, 1m, 3m, 6m, 1y, 5y)</li>
+        </ul>
+    </div>
+    
+    <footer>
+        <p>© 2025 Stock Market Dashboard</p>
+    </footer>
+</body>
+</html>

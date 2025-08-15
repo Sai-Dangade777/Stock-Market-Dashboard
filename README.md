@@ -33,6 +33,49 @@ A full-stack web application that displays stock market data with an interactive
 - Git & GitHub - Version control
 - npm - Package management
 
+## Deployment Instructions
+
+### Backend Deployment (Vercel)
+
+1. Make sure you have a Vercel account and the Vercel CLI installed
+2. Navigate to the backend directory:
+   ```bash
+   cd backend
+   ```
+3. Deploy to Vercel:
+   ```bash
+   vercel
+   ```
+4. Follow the prompts to link your project
+5. When deployment is complete, note the URL for your backend API
+
+### Frontend Deployment (Vercel)
+
+1. Set the backend API URL in the frontend environment:
+   ```bash
+   cd frontend
+   ```
+2. Create a `.env.production` file with your backend URL:
+   ```
+   REACT_APP_API_URL=https://your-backend-api-url.vercel.app/api
+   ```
+3. Deploy to Vercel:
+   ```bash
+   vercel
+   ```
+4. Follow the prompts to link your project
+
+### Alternative Frontend Deployment (GitHub Pages)
+
+1. Make sure the `homepage` field in `package.json` is set correctly:
+   ```json
+   "homepage": "https://yourusername.github.io/repository-name/"
+   ```
+2. Deploy using the GitHub Pages script:
+   ```bash
+   npm run deploy
+   ```
+
 ## Getting Started
 
 ### Prerequisites

@@ -5,7 +5,7 @@ import { mockCompanies, generateMockStockData, generateMockCompanyDetails } from
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
 
 // Check if we're on GitHub Pages or if API is not available
-const isGitHubPages = window.location.hostname.includes('github.io');
+const isGitHubPages = window.location.hostname.endsWith('.github.io');
 const isVercelDeployment = window.location.hostname.includes('vercel.app');
 
 // For debugging

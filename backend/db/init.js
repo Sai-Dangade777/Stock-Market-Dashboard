@@ -73,7 +73,7 @@ async function fetchCompanyDetails(symbol) {
       avgVolume: details.averageVolume
     };
   } catch (error) {
-    console.error(`Error fetching details for ${symbol}:`, error);
+    console.error("Error fetching details for %s:", symbol, error);
     return {
       symbol,
       name: companyInfo[symbol]?.name || symbol,

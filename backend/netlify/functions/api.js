@@ -30,7 +30,7 @@ app.get('/history/:symbol', async (req, res) => {
     const history = getStockHistory(symbol, period);
     res.json(history);
   } catch (error) {
-    console.error(`Error fetching history for ${req.params.symbol}:`, error);
+    console.error('Error fetching history for %s:', req.params.symbol, error);
     res.status(500).json({ error: `Failed to fetch history for ${req.params.symbol}` });
   }
 });

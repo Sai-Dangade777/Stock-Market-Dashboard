@@ -46,7 +46,7 @@ router.post('/refresh/:symbol', async (req, res) => {
     const result = await refreshStockData(symbol);
     res.json(result);
   } catch (error) {
-    console.error(`Error refreshing data for ${req.params.symbol}:`, error);
+    console.error('Error refreshing data for %s:', req.params.symbol, error);
     res.status(500).json({ error: `Failed to refresh data for ${req.params.symbol}` });
   }
 });
